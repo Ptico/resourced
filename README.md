@@ -1,5 +1,7 @@
 # Resourced
 
+[![Build Status](https://travis-ci.org/Ptico/resourced.png)](https://travis-ci.org/Ptico/resourced)
+
 Resourced adds a missing layer between model and controller.
 It takes all parameter- and scope-related jobs from the model and makes your model thin. Here is example:
 
