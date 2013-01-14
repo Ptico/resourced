@@ -41,11 +41,11 @@ post = posts.build
 post # => #<Post id: nil, title: "My first post", body: "Lorem ipsum", category: nil>
 
 # Let params: { id: 2, title: "My awesome post" }
-post.update! # Will update title for post with id 2
-post.first   # Will find first post with title "My awesome post"
+posts.update! # Will update title for post with id 2
+posts.first   # Will find first post with title "My awesome post"
 
 # Let params: { search: "Atlas Shrugged" }
-post.all # Will return all posts which contains "Atlas Shrugged" unless current user is guest
+posts.all # Will return all posts which contains "Atlas Shrugged" unless current user is guest
 ```
 
 ## Installation
