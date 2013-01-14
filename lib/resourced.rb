@@ -14,7 +14,7 @@ module Resourced
         @body  = @params.keep_if { |k, v| attribute_names.include?(k) }
       end
       attr_accessor :params, :scope
-      attr_reader   :model, :chain
+      attr_reader   :model, :chain, :key
 
       ##
       # Run external code in context of facade
