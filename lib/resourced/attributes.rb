@@ -5,9 +5,10 @@ module Resourced
 
     module InstanceMethods
       def initialize(params, scope)
-        set(params)
+        @attr_body = self.class.body
+        set(@attr_body ? params[@attr_body] : params)
       end
-      attr_reader :attributes
+      attr_reader :attributes, :attr_body
 
       ##
       # Set additional params
@@ -162,13 +163,17 @@ module Resourced
         @_attributes_obj.instance_eval(&block)
       end
 
+      def body(name=nil)
+        name ? @attr_body = name : @attr_body
+      end
+
       attr_reader :_attributes_obj
     end
 
     include InstanceMethods
 
     def self.included(base)
-      base.extend  ClassMethods
+      base.extend ClassMethods
     end
   end
 end

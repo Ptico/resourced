@@ -4,7 +4,7 @@ describe Resourced::Attributes do
   class AttributesTest
     include Resourced::Attributes
 
-    def initialize(params, scope)
+    def initialize(params, scope=nil)
       @scope = scope
       super
     end
@@ -84,6 +84,19 @@ describe Resourced::Attributes do
       it "should contain conditional param" do
         inst.attributes.keys.should eq([:a, :b, :c])
       end
+    end
+  end
+
+  describe "Attribute body" do
+    klass = AttributesTest.dup
+    klass.body :test
+    klass.attributes do
+      allow :a, :b
+    end
+    inst = klass.new({ :test => params })
+
+    it "should get attributes from given body" do
+      inst.attributes.keys.should eq([:a, :b])
     end
   end
 end
