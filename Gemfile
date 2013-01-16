@@ -6,5 +6,5 @@ gemspec
 group :test do
   gem "rake"
   gem "sqlite3"
-  gem "activerecord"
+  gem "activerecord", "~> 3.2"
 end
