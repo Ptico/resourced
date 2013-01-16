@@ -12,7 +12,7 @@ class PostResource
   model Post
   key :id
 
-  params do
+  attributes do
     allow :title, :body, :tags
     allow :category, if: -> { scope.admin? }
   end
