@@ -12,7 +12,7 @@ module Resourced
         @chain = @model
         super
       end
-      attr_accessor :attributes, :scope
+      attr_accessor :scope
       attr_reader   :model, :chain, :key
 
       ##
