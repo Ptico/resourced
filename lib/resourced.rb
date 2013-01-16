@@ -1,23 +1,22 @@
 require "resourced/version"
-require "resourced/params"
+require "resourced/attributes"
 require "resourced/finders"
 
 module Resourced
-  module Facade
+  module Resource
     module InstanceMethods
-      def initialize(params, scope)
+      def initialize(params, scope=nil)
         @scope = scope
         @model = self.class.instance_variable_get(:@model)
         @key   = self.class.instance_variable_get(:@key)
         @chain = @model
         super
-        @body  = @params.keep_if { |k, v| attribute_names.include?(k) }
       end
-      attr_accessor :params, :scope
+      attr_accessor :attributes, :scope
       attr_reader   :model, :chain, :key
 
       ##
-      # Run external code in context of facade
+      # Run external code in context of resource
       #
       # Examples:
       #
@@ -45,7 +44,7 @@ module Resourced
       end
 
       ##
-      # Duplicate facade and set another model class
+      # Duplicate resource and set another model class
       #
       def [](model_class)
         klass = self.dup
@@ -62,7 +61,7 @@ module Resourced
     end
 
     def self.included(base)
-      base.send(:include, Resourced::Params)
+      base.send(:include, Resourced::Attributes)
       base.send(:include, Resourced::Finders)
       base.send(:include, InstanceMethods)
       base.extend ClassMethods

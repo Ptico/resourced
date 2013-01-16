@@ -1,5 +1,4 @@
 require "resourced"
-require "resourced/active_record/meta"
 require "resourced/active_record/proxy"
 require "resourced/active_record/actions"
 
@@ -25,8 +24,7 @@ module Resourced
     end
 
     def self.included(base)
-      base.send(:include, Resourced::Facade)
-      base.send(:include, Meta)
+      base.send(:include, Resourced::Resource)
       base.send(:include, Proxy)
       base.send(:include, Actions)
       base.extend ClassMethods

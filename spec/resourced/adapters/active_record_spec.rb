@@ -22,7 +22,7 @@ describe Resourced::ActiveRecord do
       model User
       key :id
 
-      params do
+      attributes do
         allow :name, :email
         allow :role, :if => lambda { scope == "admin" }
       end

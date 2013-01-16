@@ -1,12 +1,13 @@
 require "active_support/core_ext/array"
 
 module Resourced
-  module Params
+  module Attributes
 
     module InstanceMethods
       def initialize(params, scope)
         set(params)
       end
+      attr_reader :attributes
 
       ##
       # Set additional params
@@ -20,12 +21,12 @@ module Resourced
       #     resource.set(role: "guest")
       #
       def set(params={})
-        sanitized = self.class._params_obj.sanitize_params(self, params)
+        sanitized = self.class._attributes_obj.sanitize_params(self, params)
 
-        if @params
-          @params.merge(sanitized)
+        if @attributes
+          @attributes.merge(sanitized)
         else
-          @params = sanitized
+          @attributes = sanitized
         end
 
         self
@@ -44,16 +45,10 @@ module Resourced
       #
       def erase(*keys)
         keys.each do |key|
-          @params.delete(key.to_sym)
+          @attributes.delete(key.to_sym)
         end
 
         self
-      end
-
-    protected
-
-      def params
-        @params
       end
     end
 
@@ -162,12 +157,12 @@ module Resourced
     end
 
     module ClassMethods
-      def params(&block)
-        @_params_obj ||= RuleSet.new
-        @_params_obj.instance_eval(&block)
+      def attributes(&block)
+        @_attributes_obj ||= RuleSet.new
+        @_attributes_obj.instance_eval(&block)
       end
 
-      attr_reader :_params_obj
+      attr_reader :_attributes_obj
     end
 
     include InstanceMethods

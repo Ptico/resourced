@@ -1,8 +1,8 @@
-require "resourced/params"
+require "resourced/attributes"
 
 module Resourced
   module Finders
-    class Finders < Resourced::Params::RuleSet
+    class Finders < Resourced::Attributes::RuleSet
       def initialize
         super
         @finders = {}
@@ -40,13 +40,14 @@ module Resourced
       def initialize(params, scope)
         super
         @finders_obj = self.class.instance_variable_get(:@_finders_obj)
-        @finders = @finders_obj.sanitize_params(chain, params)
+        @finders = @finders_obj.sanitize_params(self, params)
 
         defaults = self.class.instance_variable_get(:@_default_finders)
         defaults.each do |finder|
           context(&finder)
         end
       end
+      attr_reader :finders
 
       def apply_finders
         @finders.each_pair do |key, value|

@@ -3,14 +3,14 @@ module Resourced
 
     module Actions
       def build
-        model.new(@body)
+        model.new(@attributes)
       end
 
       def update
-        body = @body.reject { |k,_| k == :id }
+        body = @attributes.reject { |k,_| k == :id }
 
-        collection = if params[key]
-          [model.find(params[key])]
+        collection = if attributes[key]
+          [model.find(attributes[key])]
         else
           all
         end
@@ -22,10 +22,10 @@ module Resourced
       end
 
       def update!
-        body = @body.reject { |k,_| k == :id }
+        body = @attributes.reject { |k,_| k == :id }
 
-        collection = if params[key]
-          [model.find(params[key])]
+        collection = if @attributes[key]
+          [model.find(@attributes[key])]
         else
           all
         end
