@@ -99,4 +99,18 @@ describe Resourced::Attributes do
       inst.attributes.keys.should eq([:a, :b])
     end
   end
+
+  describe "Coercions" do
+    klass = AttributesTest.dup
+    klass.attributes do
+      allow :a, :as => :boolean
+      allow :b, :as => :integer
+    end
+    inst = klass.new({ :a => "0", :b => "7" })
+
+    it "should coerce params" do
+      inst.attributes[:a].should be_false
+      inst.attributes[:b].should eql(7)
+    end
+  end
 end

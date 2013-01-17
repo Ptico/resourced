@@ -1,4 +1,5 @@
 require "active_support/core_ext/array"
+require "coercible"
 
 module Resourced
   module Attributes
@@ -55,6 +56,7 @@ module Resourced
 
     class RuleSet
       def initialize
+        @types                   = {}
         @defaults                = {}
         @conditional_allows      = []
         @unconditional_allows    = []
@@ -82,6 +84,12 @@ module Resourced
           @conditional_allows << ConditionalGroup.new(opts[:if], fields)
         else
           @unconditional_allows += fields
+        end
+
+        if as = opts[:as]
+          fields.each do |field|
+            @types[field] = :"to_#{as}"
+          end
         end
 
         if opts[:default]
@@ -134,7 +142,17 @@ module Resourced
           end
         end
 
-        @defaults.merge(params).symbolize_keys.keep_if { |k, v| allowed_params.include?(k) } # AS
+        result = {}
+        coercer = Coercible::Coercer.new unless @types.empty?
+
+        @defaults.merge(params).symbolize_keys.each do |k, v|
+          if allowed_params.include?(k)
+            val = @types[k] ? coercer[v.class].public_send(@types[k], v) : v
+            result[k] = val
+          end
+        end # AS
+
+        result
       end
     end
 
