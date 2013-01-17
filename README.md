@@ -10,11 +10,13 @@ class PostResource
   include Resourced::ActiveRecord
 
   model Post
-  key :id
+  body  :post
+  key   :id
 
   attributes do
-    allow :title, :body, :tags
-    allow :category, if: -> { scope.admin? }
+    allow :title, :body
+    allow :tags, as: :array
+    allow :category, as: :string, if: -> { scope.admin? }
   end
 
   finders do
@@ -26,6 +28,10 @@ class PostResource
 
     finder :search do |val|
       chain.where(t[:body].matches("%#{val}%"))
+    end
+
+    finder :limit, as: :integer, default: 20 do |val|
+      chain.limit(20)
     end
   end
 end
@@ -54,7 +60,7 @@ posts.all # Will return all posts which contains "Atlas Shrugged" unless current
 
 Add this line to your application's Gemfile:
 
-    gem 'resourced'
+    gem 'resourced', '~> 0.1'
 
 And then execute:
 
@@ -65,6 +71,21 @@ Or install it yourself as:
     $ gem install resourced
 
 ## Usage
+
+### Creating Resources
+
+If you are using rails, your resource files will be automatically generated with models or resources.
+
+```
+rails generate resource Something field1:string field2:integer
+```
+
+You can also generate resource file manually:
+```
+rails generate resourced Something field1:string field2:integer
+```
+
+This will create folder `app/resources` if not exists, and basic resource file.
 
 ## Contributing
 

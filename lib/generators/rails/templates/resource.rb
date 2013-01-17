@@ -2,7 +2,7 @@ class <%= class_name %>Resource
   include Resourced::ActiveRecord
 
   model <%= class_name %>
-  body :<%= table_name %>
+  body :<%= singular_name %>
   key  :id
 
   attributes do
