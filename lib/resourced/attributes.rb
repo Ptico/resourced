@@ -1,4 +1,3 @@
-require "active_support/core_ext/array"
 require "coercible"
 
 module Resourced
@@ -78,7 +77,7 @@ module Resourced
       #     allow :role, default: "guest"
       #
       def allow(*fields)
-        opts = fields.extract_options! # AS
+        opts = extract_options(fields)
 
         if opts[:if]
           @conditional_allows << ConditionalGroup.new(opts[:if], fields)
@@ -112,7 +111,7 @@ module Resourced
       #     restrict :role, if: -> { scope !== :admin }
       #
       def restrict(*fields)
-        opts = fields.extract_options! # AS
+        opts = extract_options(fields)
 
         if opts[:if]
           @conditional_restricts << ConditionalGroup.new(opts[:if], fields)
@@ -145,14 +144,24 @@ module Resourced
         result = {}
         coercer = Coercible::Coercer.new unless @types.empty?
 
-        @defaults.merge(params).symbolize_keys.each do |k, v|
+        @defaults.merge(params).each do |k, v|
+          k = k.to_sym
+
           if allowed_params.include?(k)
-            val = @types[k] ? coercer[v.class].public_send(@types[k], v) : v
-            result[k] = val
+            result[k] = @types[k] ? coercer[v.class].public_send(@types[k], v) : v
           end
-        end # AS
+        end
 
         result
+      end
+
+    private
+      def extract_options(args)
+        if args.last.is_a?(Hash)
+          args.pop
+        else
+          {}
+        end
       end
     end
 
