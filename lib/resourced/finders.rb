@@ -41,15 +41,15 @@ module Resourced
         super
         @finders_obj = self.class.instance_variable_get(:@_finders_obj)
         @finders = @finders_obj.sanitize_params(self, params)
-
-        defaults = self.class.instance_variable_get(:@_default_finders)
-        defaults.each do |finder|
-          context(&finder)
-        end
       end
       attr_reader :finders
 
       def apply_finders
+        defaults = self.class.instance_variable_get(:@_default_finders)
+        defaults.each do |finder|
+          @chain = self.instance_eval(&finder)
+        end
+
         @finders.each_pair do |key, value|
           @chain = self.instance_exec(value, &@finders_obj.finders[key.to_sym])
         end
@@ -61,11 +61,12 @@ module Resourced
     module ClassMethods
       def finders(&block)
         @_finders_obj ||= Finders.new
-        @_finders_obj.instance_eval(&block)
+        @_finders_obj.instance_eval(&block) if block_given?
       end
       attr_reader :_finders_obj
 
       def default_finder(&block)
+        finders
         @_default_finders << block if block_given?
       end
     end

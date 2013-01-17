@@ -78,4 +78,17 @@ describe Resourced::Finders do
     end
   end
 
+  describe "Default finder" do
+    before :each do
+      klass.default_finder do
+        chain.default("foo")
+      end
+    end
+    let(:params) { {} }
+
+    it "should apply default finder" do
+      inst.apply_finders.chain.result.should eq("#default(foo)")
+    end
+  end
+
 end
