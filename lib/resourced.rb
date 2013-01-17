@@ -1,6 +1,7 @@
 require "resourced/version"
 require "resourced/attributes"
 require "resourced/finders"
+require "resourced/railtie" if defined?(Rails)
 
 module Resourced
   module Resource
