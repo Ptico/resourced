@@ -22,6 +22,7 @@ module Resourced
       #     resource.set(role: "guest")
       #
       def set(params={})
+        return if params.nil?
         sanitized = self.class._attributes_obj.sanitize_params(self, params)
 
         if @attributes

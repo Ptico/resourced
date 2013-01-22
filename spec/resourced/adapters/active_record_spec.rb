@@ -20,7 +20,8 @@ describe Resourced::ActiveRecord do
       include Resourced::ActiveRecord
 
       model User
-      key :id
+      body :user
+      key  :id
 
       attributes do
         allow :name, :email
@@ -37,7 +38,7 @@ describe Resourced::ActiveRecord do
 
   describe "Create" do
     it "should filter params" do
-      inst  = klass.new({ :name => "Peter", :email => "peter@test.com", :role => "admin" }, "")
+      inst  = klass.new({ :user => { :name => "Peter", :email => "peter@test.com", :role => "admin" } }, "")
       attrs = inst.build.attributes
 
       attrs["name"].should eq("Peter")
@@ -83,7 +84,7 @@ describe Resourced::ActiveRecord do
     end
 
     it "should prepare collection to update" do
-      inst = klass.new({ :id => [2, 3], :role => "guest" }, "admin")
+      inst = klass.new({ :id => [2, 3], :user => { :role => "guest" } }, "admin")
 
       collection = inst.update
 
@@ -91,7 +92,7 @@ describe Resourced::ActiveRecord do
     end
 
     it "should update the record immediatly" do
-      inst = klass.new({ :id => [2, 3], :role => "guest" }, "admin")
+      inst = klass.new({ :id => [2, 3], :user => { :role => "guest" } }, "admin")
 
       inst.update!
 
