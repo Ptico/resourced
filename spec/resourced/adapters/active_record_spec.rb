@@ -13,7 +13,7 @@ describe Resourced::ActiveRecord do
     teardown_db
   end
 
-  class User < ActiveRecord::Base; end;
+  class User < ActiveRecord::Base; end
 
   let(:klass) do
     Class.new do
@@ -29,8 +29,11 @@ describe Resourced::ActiveRecord do
       end
 
       finders do
-        finder :name do |v|
-          chain.where(:name => v)
+        finder :search do |val|
+          chain = self.chain
+          chain = chain.where(:name => val[:name]) if val[:name].present?
+          chain = chain.where(:email => val[:email]) if val[:email].present?
+          chain
         end
       end
     end
@@ -53,26 +56,71 @@ describe Resourced::ActiveRecord do
       add_user 3, "Lisa", "lisa@test.com", "user"
     end
 
-    it "should find by pkey" do
-      inst = klass.new({ :id => 3 }, "")
+    describe 'Filtering data by init params' do
 
-      inst.first.name.should eq("Lisa")
-    end
+      it "should find by pkey" do
+        inst = klass.new({ :id => 3 }, "")
 
-    it "should find with finder" do
-      inst = klass.new({ :name => "Bart" }, "")
-
-      inst.first.email.should eq("bart@test.com")
-    end
-
-    it "should iterate over results with #map" do
-      inst = klass.new({}, "")
-
-      result = inst.map do |user|
-        user.name
+        inst.first.name.should eq("Lisa")
       end
 
-      result.should eq(%w(Homer Bart Lisa))
+      it "should find with finder" do
+        inst = klass.new({ :name => "Bart" }, "")
+
+        inst.first.email.should eq("bart@test.com")
+      end
+
+      it "should iterate over results with #map" do
+        inst = klass.new({}, "")
+
+        result = inst.map do |user|
+          user.name
+        end
+
+        result.should eq(%w(Homer Bart Lisa))
+      end
+    end
+
+    describe 'searching by finders' do
+      before :each do
+        @inst = klass.new({}, "")
+      end
+
+      it 'searches by :name finder' do
+        search = @inst.set(search: {name: 'Homer'}).all
+
+        search.size.should eq(1)
+        search.first.name.should eq("Homer")
+        search.first.email.should eq("homer@test.com")
+      end
+
+      it 'searches by :name finder using array' do
+        search = @inst.set(search: {name: ['Homer', 'Lisa']}).all
+
+        search.size.should eq(2)
+        search.first.name.should eq("Homer")
+        search.first.email.should eq("homer@test.com")
+
+        search.last.name.should eq("Lisa")
+        search.last.email.should eq("lisa@test.com")
+      end
+
+      it 'searches by :email finder using match' do
+        search = @inst.set(search: {email: 'li%@test%'}).all
+
+        search.size.should eq(2)
+        search.first.name.should eq("Homer")
+        search.first.email.should eq("homer@test.com")
+
+        search.last.name.should eq("Lisa")
+        search.last.email.should eq("lisa@test.com")
+      end
+
+      it 'searches by finder without val' do
+        search = @inst.set(search: {}).all
+
+        search.should be_nil
+      end
     end
   end
 
