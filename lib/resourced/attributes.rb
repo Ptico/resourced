@@ -6,52 +6,9 @@ module Resourced
     module InstanceMethods
       def initialize(params, scope)
         @attr_body = self.class.body
-        set(@attr_body ? params[@attr_body] : params)
+        @attributes = self.class._attributes_obj.sanitize_params(self, @attr_body ? params[@attr_body] : params) if params.present?
       end
       attr_reader :attributes, :attr_body
-
-      ##
-      # Set additional params
-      #
-      # Params:
-      # - params {Hash} List of params to be assigned
-      #
-      # Examples:
-      #
-      #     resource = UserResource.new(params, scope)
-      #     resource.set(role: "guest")
-      #
-      def set(params={})
-        return if params.nil?
-        sanitized = self.class._attributes_obj.sanitize_params(self, params)
-
-        if @attributes
-          @attributes.merge(sanitized)
-        else
-          @attributes = sanitized
-        end
-
-        self
-      end
-
-      ##
-      # Erase existing params
-      #
-      # Params:
-      # - params {Hash} List of param keys to be erased
-      #
-      # Examples:
-      #
-      #     resource = UserResource.new(params, scope)
-      #     resource.erase(:password, :auth_token)
-      #
-      def erase(*keys)
-        keys.each do |key|
-          @attributes.delete(key.to_sym)
-        end
-
-        self
-      end
     end
 
     class RuleSet
@@ -63,7 +20,7 @@ module Resourced
         @conditional_restricts   = []
         @unconditional_restricts = []
       end
-      attr_reader :defaults
+      attr_reader :defaults, :finders
 
       ##
       # Allow field(s) to be assigned
@@ -124,6 +81,7 @@ module Resourced
       end
 
       def sanitize_params(context, params)
+        params ||= {}
         allowed_params = @unconditional_allows
 
         @conditional_allows.each do |cond|
