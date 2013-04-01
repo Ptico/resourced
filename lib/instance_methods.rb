@@ -43,7 +43,6 @@ module Resourced
       #
       def set(params={})
         return if params.nil?
-        debugger
         sanitized_attributes = self.class._attributes_obj.sanitize_params(self, params)
 
         if @attributes
