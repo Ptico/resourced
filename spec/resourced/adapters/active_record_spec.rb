@@ -80,7 +80,6 @@ describe Resourced::ActiveRecord do
       end
 
       pending it "should find with attribute" do
-        debugger
         inst = klass.new( { :name => "Bart" }, "")
 
         inst.first.email.should eq("bart@test.com")
