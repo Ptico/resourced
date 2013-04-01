@@ -6,7 +6,7 @@ module Resourced
     module InstanceMethods
       def initialize(params, scope)
         @attr_body = self.class.body
-        @attributes = self.class._attributes_obj.sanitize_params(self, @attr_body ? params[@attr_body] : params) if params.present?
+        @attributes = self.class._attributes_obj.sanitize_params(self, params[@attr_body] ? params[@attr_body] : params) if params.present?
       end
       attr_reader :attributes, :attr_body
     end
