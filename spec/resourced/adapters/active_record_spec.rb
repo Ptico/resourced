@@ -64,8 +64,14 @@ describe Resourced::ActiveRecord do
         inst.first.name.should eq("Lisa")
       end
 
-      it "should find with finder" do
-        inst = klass.new({ :name => "Bart" }, "")
+      it "finds with finder" do
+        inst = klass.new({search: { :name => "Bart" }}, "")
+
+        inst.first.email.should eq("bart@test.com")
+      end
+
+      it "should find with attribute" do
+        inst = klass.new({user: { :name => "Bart" }}, "")
 
         inst.first.email.should eq("bart@test.com")
       end
