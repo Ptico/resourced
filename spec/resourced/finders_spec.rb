@@ -54,6 +54,14 @@ describe Resourced::Finders do
         inst.apply_finders.chain.result.should eq("")
       end
     end
+
+    context "with corresponding parameters which are blank" do
+      let(:params) { {offset: {} } }
+
+      it "should be called" do
+        inst.apply_finders.chain.result.should eq("#offset({})")
+      end
+    end
   end
 
   describe "Finder with default" do
