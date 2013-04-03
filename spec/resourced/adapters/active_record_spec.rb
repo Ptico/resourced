@@ -13,7 +13,7 @@ describe Resourced::ActiveRecord do
     teardown_db
   end
 
-  class User < ActiveRecord::Base; end;
+  class User < ActiveRecord::Base; end
 
   let(:klass) do
     Class.new do
@@ -29,16 +29,28 @@ describe Resourced::ActiveRecord do
       end
 
       finders do
-        finder :name do |v|
-          chain.where(:name => v)
+        finder :search do |val|
+          chain = self.chain
+          chain = chain.where('1=0') if val.blank?
+          chain = chain.where(:name => val[:name]) if val[:name].present?
+          chain = chain.where(:email => val[:email]) if val[:email].present?
+          chain
         end
       end
     end
   end
 
   describe "Create" do
-    it "should filter params" do
+    it "should filter params with :user body" do
       inst  = klass.new({ :user => { :name => "Peter", :email => "peter@test.com", :role => "admin" } }, "")
+      attrs = inst.build.attributes
+
+      attrs["name"].should eq("Peter")
+      attrs["role"].should be_nil
+    end
+
+    it "should filter params without :user body" do
+      inst  = klass.new({ :name => "Peter", :email => "peter@test.com", :role => "admin" }, "")
       attrs = inst.build.attributes
 
       attrs["name"].should eq("Peter")
@@ -53,26 +65,66 @@ describe Resourced::ActiveRecord do
       add_user 3, "Lisa", "lisa@test.com", "user"
     end
 
-    it "should find by pkey" do
-      inst = klass.new({ :id => 3 }, "")
+    describe 'Filtering data by init params' do
 
-      inst.first.name.should eq("Lisa")
-    end
+      it "should find by pkey" do
+        inst = klass.new({ :id => 3 }, "")
 
-    it "should find with finder" do
-      inst = klass.new({ :name => "Bart" }, "")
-
-      inst.first.email.should eq("bart@test.com")
-    end
-
-    it "should iterate over results with #map" do
-      inst = klass.new({}, "")
-
-      result = inst.map do |user|
-        user.name
+        inst.first.name.should eq("Lisa")
       end
 
-      result.should eq(%w(Homer Bart Lisa))
+      it "finds with finder" do
+        inst = klass.new({search: { :name => "Bart" }}, "")
+
+        inst.first.email.should eq("bart@test.com")
+      end
+
+      pending it "should find with attribute" do
+        inst = klass.new( { :name => "Bart" }, "")
+
+        inst.first.email.should eq("bart@test.com")
+      end
+
+      it "should iterate over results with #map" do
+        inst = klass.new({}, "")
+
+        result = inst.map do |user|
+          user.name
+        end
+
+        result.should eq(%w(Homer Bart Lisa))
+      end
+    end
+
+    describe 'searching by finders' do
+      before :each do
+        @inst = klass.new({}, "")
+      end
+
+      it 'searches by :name finder' do
+        search = @inst.set(search: {name: 'Homer'}).all
+
+        search.size.should eq(1)
+        search.first.name.should eq("Homer")
+        search.first.email.should eq("homer@test.com")
+      end
+
+      it 'searches by :name finder using array' do
+        search = @inst.set(search: {name: ['Homer', 'Lisa']}).all
+
+        search.size.should eq(2)
+        search.first.name.should eq("Homer")
+        search.first.email.should eq("homer@test.com")
+
+        search.last.name.should eq("Lisa")
+        search.last.email.should eq("lisa@test.com")
+      end
+
+      it 'searches by finder without val' do
+        search = @inst.set(search: {}).all
+
+        search.should be_blank
+      end
     end
   end
 
@@ -91,7 +143,7 @@ describe Resourced::ActiveRecord do
       collection.map{ |u| u.role }.should eq(["guest", "guest"])
     end
 
-    it "should update the record immediatly" do
+    it "should update the record immediately" do
       inst = klass.new({ :id => [2, 3], :user => { :role => "guest" } }, "admin")
 
       inst.update!
